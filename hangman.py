@@ -1,22 +1,30 @@
 import os
 import random
 from string import ascii_uppercase
-from tkinter import *
 from tkinter import messagebox
 
-window = Tk()
+from ttkbootstrap import *
+from StringUtils import *
+
+window = tk.Tk()
+# window = ttk.Window(themename="darkly")
 window.title('Hangman Game')
+# window.iconbitmap('images/hangman.ico')
+# window.call('wm', 'iconphoto', window._w, tk.PhotoImage(file='images/hangman.ico'))
 
 MAX_NUMBER_OF_GUESSES = 11
 LETTERS_PER_ROW = 9
 
 numberOfGuesses = 0
-wordWithSpaces = ""
+word = ""
+guessedWord = ""
+
 
 def loadImages():
     loadedImages = []
     for i in range(MAX_NUMBER_OF_GUESSES + 1):
-        loadedImages.append(PhotoImage(file="images/hang" + str(i) + ".png"))
+        # loadedImages.append(tksvg.SvgImage(file="images/svg/hang" + str(i) + ".svg"))
+        loadedImages.append(PhotoImage(file="images/png/hang" + str(i) + ".png"))
     return loadedImages
 
 
@@ -53,35 +61,40 @@ def loadRandomWord():
 
 
 def resetGame():
-    global wordWithSpaces
+    global word
+    global guessedWord
     global numberOfGuesses
     numberOfGuesses = 0
 
     word = loadRandomWord().upper()
-    wordWithSpaces = " ".join(word)
-    wordLabel.set(' '.join("_" * len(word)))
+    guessedWord = "_" * len(word)
+    wordLabel.set(' '.join(guessedWord))
     imageLabel.config(image=images[numberOfGuesses])
     print("Set the Label to: " + ' '.join("_" * len(word)))
-    print("The word is: " + wordWithSpaces)
+    print("The word is: " + word)
     print("The word is: " + word)
     print("The word is: " + str(len(word)))
 
 
 def guess(guessedLetter):
     print("Guessed letter " + guessedLetter)
+    global word
+    global guessedWord
     global numberOfGuesses
 
     # if the number of guesses is less than the maximum number of guesses
     if numberOfGuesses < MAX_NUMBER_OF_GUESSES:
 
         # get the characters of the word
-        wordCharacters = list(wordWithSpaces)
+        wordCharacters = list(word)
+        print("Word Characters: " + str(wordCharacters))
 
         # get the characters of the already guessed word
-        guessedWordList = list(wordLabel.get())
+        guessedWordList = list(guessedWord)
+        print("Guessed Word: " + str(guessedWordList))
 
         # if the guessed letter is in the word
-        if wordWithSpaces.count(guessedLetter) > 0:
+        if word.count(guessedLetter) > 0:
 
             # loop through the word
             for letterIndex in range(len(wordCharacters)):
@@ -92,10 +105,11 @@ def guess(guessedLetter):
                     guessedWordList[letterIndex] = guessedLetter
 
                 # set the word label to the guessed word
-                wordLabel.set("".join(guessedWordList))
+                guessedWord = "".join(guessedWordList)
+                wordLabel.set(" ".join(guessedWord))
 
                 # if the word label is the same as the word with spaces
-                if wordLabel.get() == wordWithSpaces:
+                if guessedWord == word:
                     messagebox.showinfo("Hangman", "You guessed it!")
                     newGame = messagebox.askyesno("Hangman", "Do you want to play again?")
                     if newGame:
@@ -138,15 +152,16 @@ wordlistSelect.set("Select a wordlist")
 wordlistMenu = OptionMenu(window, wordlistSelect, *os.listdir("wordlists"), command=setWordlist)
 wordlistMenu.grid(row=0, column=0, columnspan=3, padx=10, pady=20)
 
-imageLabel = Label(window)
+imageLabel = tk.Label(window)
 imageLabel.grid(row=1, column=0, columnspan=3, padx=10, pady=40)
 
-wordLabel = StringVar()
-Label(window, textvariable=wordLabel, font='Arial 20 bold').grid(row=1, column=3, columnspan=6, padx=10)
+wordLabel = tk.StringVar()
+tk.Label(window, textvariable=wordLabel, font='Arial 20 bold').grid(row=1, column=3, columnspan=6, padx=10)
 
 letterIndex = 0
 for letter in ascii_uppercase:
-    Button(window, text=letter, command=lambda pressedLetter=letter: guess(pressedLetter), font='Arial 16', width=4).grid(
+    tk.Button(window, text=letter, command=lambda pressedLetter=letter: guess(pressedLetter), font='Arial 16',
+              width=4).grid(
         row=2 + letterIndex // LETTERS_PER_ROW,
         column=letterIndex % LETTERS_PER_ROW)
     letterIndex += 1
@@ -159,6 +174,6 @@ for letter in ascii_uppercase:
 
 # Button(window, text="New\nGame", command=lambda: resetGame(), font="Helvetica 10 bold", width=4).grid(row=4, column=8)
 
-Button(window, text="New\nGame", command=lambda: resetGame(), font="Arial 10 bold", width=4).grid(row=0, column=8)
+tk.Button(window, text="New\nGame", command=lambda: resetGame(), font="Arial 10 bold", width=4).grid(row=0, column=8)
 
 window.mainloop()
